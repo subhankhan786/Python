@@ -2,8 +2,7 @@ from pytube import YouTube
 
 save_path = "E:/python"
 
-user = str(input("Enter link here: "))
-link = user 
+link = "https://youtu.be/AtGih-K-7U0"
 
 try:
     yt = YouTube(link)
