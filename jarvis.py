@@ -1,10 +1,13 @@
 #-----------------------------------------------IMPORTS USED IN THIS PROJECT ARE LISTED BELOW------------------------------------------------#
 
-import JarvisAI
+from urllib import response
 import requests
+import urllib.request
 from requests.api import request
-from win32com.client import Dispatch
+import pyttsx3
 import datetime
+from datetime import date
+from googletrans import Translator, constants
 import speech_recognition as sr
 import datetime
 import wikipedia
@@ -12,19 +15,22 @@ import webbrowser
 import os
 import random
 import re
-import JarvisAI
 from pywikihow import search_wikihow
 import requests
 from bs4 import BeautifulSoup
 import psutil
 
-obj = JarvisAI.JarvisAssistant()
+singlequote = "'"
 #-----------------------------------------------THIS FUNCTION ENABLES JARVIS TO SPEAK----------------------------------------------------------#
 
-
-def speak(str):
-    speak = Dispatch("SAPI.SPvoice")
-    speak.speak(str)
+engine = pyttsx3.init("sapi5")
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[0].id)
+engine.setProperty('rate', 165)
+def speak(audio):
+    engine.say(audio)
+    print(audio)
+    engine.runAndWait()
 
 
 wishtime = datetime.datetime.now().strftime("%H:%M")
@@ -90,15 +96,20 @@ if __name__ == '__main__':
 
         elif 'open stackoverflow' in query:
             webbrowser.open("stackoverflow.com")
+
         elif 'play music' in query:
-            webbrowser.open(playmusiclist)
+            speak("Song name please!")
+            search_keyword = str(takeCommand())
+            html = urllib.request.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
+            video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+            webbrowser.open("https://www.youtube.com/watch?v=" + video_ids[0])
 
         elif 'the time' in query:
             strTime = datetime.datetime.now().strftime("%H:%M")
             speak(f"Sir, the time is {strTime}")
 
         elif 'open code' in query:
-            codePath = "E:\All Games\vs code\Microsoft VS Code\Code"
+            codePath = "C:\Users\Anas\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Visual Studio Code\Visual Studio Code.lnk"
             os.startfile(codePath)
 
         elif 'open chrome' in query:
@@ -120,9 +131,8 @@ if __name__ == '__main__':
 #--------------------------------------------------JARVIS WILL TELL DATE USING JARVIS MODULE---------------------------------------------------#
 
         elif re.search('date', query):
-            date = obj.tell_me_date()
-            print(date)
-            speak(date)
+            today = date.today()
+            speak(today)
 
 #------------------------------------------------Jarvis will  activate recipe mode using WikiHow-----------------------------------------------#
 
@@ -178,14 +188,44 @@ if __name__ == '__main__':
                     f"Sir, I think we are in {city} city of {country} country")
             except Exception as e:
                 print("Sir due to network issue I am not able to find location")
+#-----------------------------------------JARVIS WILL TRANSLATE USERS LANGUAGE TO ENGLISH--------------------------------#
 
-#-----------------------------------------JARVIS WILL SEARCH ANY THING ON YOUTUBE---------------------------------------#
+        elif 'activate translation mod' in query:
+            speak("Mode activated")
+            while True:
+                speak("Tell me what you want to translate")
+                transtxt = takeCommand()
+                try:
+                    if "exit mod" in how or "close mod" in transtxt:
+                        speak("Mode deactivated")
+                        break
+                    else:
+                        txt = input("Enter the text:\n")
+                        translator = Translator()
+                        translation = translator.translate(txt)
+                        speak(translation.text)
+                except Exception as e:
+                    speak("Sir I can't translate this")
+#-----------------------------------------JARVIS WILL SEARCH ANY THING ON YOUTUBE----------------------------------------#
 
         elif 'search youtube' in query:
             speak("Sir tell what you want to search on youtube")
             youtubesearchquery = takeCommand()
             webbrowser.open(f"https://www.youtube.com/results?search_query={youtubesearchquery}")
-#-----------------------------------------------------TALLKING WITH JARVIS----------------------------------------------#
+
+#---------------------------------------------JARVIS WILL SAVE CONTACTS TO Contactlist.txt-------------------------------#
+
+        elif 'save contact' in query:
+            speak("Tell me number")
+            f = open("contactlist.txt", "a")
+            f.write(takeCommand())
+            f.close()
+            f = open("contactlist.txt", "r")
+            read = f.read()
+            speak(f"{read} is this correct")
+            f.close()
+                
+#-----------------------------------------------------TALLKING WITH JARVIS-----------------------------------------------#
 
         elif 'good morning' in query:
             speak("Good morning sir")
@@ -200,12 +240,13 @@ if __name__ == '__main__':
             speak("Good goodnight sir")
 
         elif 'sorry jarvis' in query:
-            speak("It's okay")
+            speak("It's okay sir")
 
         elif 'hello jarvis' in query:
-            speak("Hey sir!")
+            resp = ["Hey sir", "hello sir"]
+            speak(random.choice(resp))
 
-        elif 'what is your name' in query:
+        elif 'what is your name' or f'what{singlequote}s your name' in query:
             speak("My name is Jarvis")
 
         elif 'what can you do' in query:
